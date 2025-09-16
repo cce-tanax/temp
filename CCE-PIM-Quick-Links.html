@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>PIM Quick Links</title>
+
+<link rel="icon" type="image/x-icon" href="https://coreconsultingengineers.deltekpim.com/favicon.ico">
+
+<style>
+  :root {
+    --tile: 125px;
+    --gap: 18px;
+    --cols: 5;
+  }
+
+	body {
+		margin: 0;
+		padding-top: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: system-ui, Arial, sans-serif;
+
+		min-height: 80vh;
+
+		/* 3-stop diagonal gradient (top-left white → mid blue → bottom-right dark navy) */
+		background: linear-gradient(
+			210deg,
+			#ffffff 0%,      /* top-left pure white */
+			#4fb2ff 65%,     /* mid bright blue */
+			#073776 100%     /* bottom-right dark navy */
+		);
+
+		background-attachment: fixed;
+		background-repeat: no-repeat;
+		background-size: cover;
+	}
+
+
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap);
+  }
+
+  /* === GRID === */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--tile));
+    grid-template-rows: 125px 125px 125px;
+    gap: var(--gap);
+  }
+
+  .grid a, .grid div, .grid button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 1rem;
+    border-radius: 20px;
+    border: 1px solid #073776;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.20);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    overflow: hidden;
+    gap: 8px;
+  }
+
+  .grid a span { font-size: 1.8rem; margin-bottom: 6px; }
+
+  .grid a:hover, .grid button:hover {
+    background: #4fb2ff;
+    color: #ffffff;
+		font-weight: bold;
+    box-shadow: 2px 6px 12px rgba(0,0,0,0.60);
+  }
+
+  .grid .gifbtn {
+    grid-column: 2 / 6;
+    grid-row: 1;
+    padding: 0;
+  }
+  .grid .gifbtn img { width: 150%; height: auto; border-radius: 8px; object-fit: cover; }
+
+  .grid .corepim {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid #073776;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.20);
+    border-radius: 62px;
+  }
+  .grid .corepim img { width: 100%; height: auto; object-fit: cover; border-radius: 62px; }
+	.grid .corepim img:hover { width: 110%; height: auto; object-fit: cover; border-radius: 62px; }
+
+  /* === TOOLBAR === */
+  .toolbar {
+    width: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * var(--gap));
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+  }
+  .toolbar .card {
+    background: #fff;
+    border: 1px solid #073776;
+    border-radius: 14px;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.20);
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    flex: 1 1 auto;
+  }
+
+  /* Multi-select dropdown */
+  .ms-dropdown { position: relative; width: 100%; }
+  .ms-toggle {
+    height: 32px;
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+		color: #073776;
+    font-size: 0.95rem;
+    padding: 0;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .ms-toggle:after {
+    content: "▾";
+    margin-left: auto;
+    font-size: 0.9rem;
+    color: #073776;
+  }
+  .ms-summary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+  .ms-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+		color: #073776;
+    background: #fff;
+    border: 1px solid #073776;
+    border-radius: 10px;
+    box-shadow: 2px 6px 16px rgba(0,0,0,0.18);
+    padding: 8px;
+    display: none;
+    z-index: 1000;
+  }
+  .ms-panel.open { display: block; }
+  .ms-list { max-height: 240px; overflow: auto; margin: 0; padding: 0; list-style: none; }
+  .ms-item { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 8px; }
+  .ms-item:hover { background: #f0f7ff; }
+
+  /* 🚀 button */
+  .newbtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    border: 1px solid #073776;
+    border-radius: 14px;
+    width: 125px;
+    height: 46px;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 2px 6px 12px rgba(0,0,0,0.18);
+  }
+  .newbtn:hover { background: #4fb2ff; color: #fff; box-shadow: 2px 6px 12px rgba(0,0,0,0.60); }
+	
+/* === SEARCH BAR === */
+.searchbar {
+  position: relative; /* anchor for absolute dropdown */
+	width: 97%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.searchbar input {
+  width: 100%;         
+  height: 40px;
+  font-size: 1rem;
+  padding: 0 10px;
+  border: 1px solid #073776;
+  border-radius: 10px;
+  outline: none;
+  opacity: 0.6;
+}
+
+#searchResult {
+  position: absolute;
+  top: 100%;   /* directly below input */
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: #073776;
+  border: 0px solid #073776;
+  border-radius: 8px;
+  background: #fff;
+  max-height: 250px;   /* prevent overflow */
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); 
+}
+
+#searchResult div {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+#searchResult div:hover {
+  border-radius: 8px;
+  background: #f0f7ff;
+	font-weight: bold;
+}
+
+/* Checkbox tile should match grid <a> tiles */
+.checkboxbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1rem;
+  color: #2563eb;        
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 20px;
+  border: 1px solid #073776;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.20);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.checkboxbtn:hover {
+  background: #4fb2ff;
+  color: #ffffff;  
+  font-weight: bold;
+  box-shadow: 2px 6px 12px rgba(0,0,0,0.60);
+}
+
+/* Checkbox inside */
+.checkboxbtn input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #+4fb2ff;
+  cursor: pointer;
+  margin: 0;
+}
+
+}
+	
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- GRID -->
+<div class="grid">
+  <a class="corepim" href="https://coreconsultingengineers.deltekpim.com/XWeb/Default.aspx">
+    <img src="https://coreconsultingengineers.deltekpim.com/favicon.ico" alt="CORE PIM Icon">
+  </a>
+
+  <button class="gifbtn" data-url="https://coreconsultingengineers.deltekpim.com/XWeb/DMS/Main.aspx">
+    <img src="https://64.media.tumblr.com/f7060efdb5edd4a99c85750387a66e20/tumblr_pe7ugtpRcK1rhk4rn_540.gifv" alt="Animated Banner">
+  </button>
+
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Project/Dashparts/My_Projects.aspx?"><span>🚧</span>My Projects</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/DMS/Dashparts/WorkingFiles.aspx?"><span>📁</span>LFM Publish</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/DMS/Dashparts/My_Baskets.aspx?"><span>🛒</span>My Baskets</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Search/Search.aspx?def=stdbasketssharedsearch"><span>🧺</span>Shared Baskets</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/DMS/Subscriptions.aspx?Mode=contact"><span>💌</span>Subscriptions</a>
+
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Contact/AddContact.aspx?organisationType=external"><span>👽</span>➕ Contact</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Organisation/Add.aspx?organisationType=external"><span>💼</span>➕ Org</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Search/Search.aspx?def=stddrawingmanager"><span>🔍 📰</span>DLM</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/Entity/EntitySearch.aspx?ec=2"><span>🔍 💼</span>Org</a>
+  <a href="https://coreconsultingengineers.deltekpim.com/XWeb/DMS/dashparts/MyDocumentHistory.aspx?days=5"><span>🔙</span>Last 5 Days</a>
+</div>
+
+
+	<!-- TOOLBAR -->
+	<div class="toolbar">
+		<div class="card" style="flex: 1 1 auto;">
+			<div class="ms-dropdown" id="ms">
+				<button type="button" class="ms-toggle" aria-haspopup="listbox" aria-expanded="false">
+					<span class="ms-summary" id="ms-summary">My Project, LFM, My Baskets, Shared Baskets</span>
+				</button>
+				<div class="ms-panel" role="listbox" aria-multiselectable="true">
+					<ul class="ms-list" id="ms-list">
+						<li class="ms-item"><label><input type="checkbox" data-key="my-dashboard"> My Dashboard</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="my-project" checked> My Project</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="dms" checked> DMS</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="lfm" checked> LFM</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="my-baskets" checked> My Baskets</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="shared-baskets" checked> Shared Baskets</label></li>
+						<li class="ms-item"><label><input type="checkbox" data-key="subscriptions"> Subscriptions</label></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- 🚀 button -->
+		<button class="newbtn" id="openSelected" title="Open selected">🚀</button>
+
+		<label class="newbtn checkboxbtn" for="openNewTab" title="Open in new tab">
+			<input type="checkbox" id="openNewTab" checked>
+			<span>New Tabs</span>
+		</label>
+	</div>
+
+  <!-- EMBEDDED PROJECT SEARCH FRAME -->
+  <div style="width:100%; height:250px; border:1px solid #073776; border-radius:12px; overflow:hidden; margin-top:10px; margin-bottom:4px;">
+    <iframe 
+      src="https://coreconsultingengineers.deltekpim.com/XWeb/Entity/EntitySearch.aspx?ec=3"
+      style="width:100%; height:100%; border:0;"
+      title="Project Search">
+    </iframe>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="searchbar">
+    <input type="text" id="searchInput" placeholder="Search Modules" />
+    <div id="searchResult"></div>
+  </div>
+
+
+</div>
+
+<script>
+  const LVL = "https://coreconsultingengineers.deltekpim.com/XWeb/";
+
+  const LINK_ORDER = [
+    { key: "my-dashboard",   label: "My Dashboard",    url: LVL + "Core/PersonalZone.aspx" },
+    { key: "my-project",     label: "My Projects",     url: LVL + "Project/Dashparts/My_Projects.aspx?" },
+    { key: "dms",            label: "DMS",             url: LVL + "DMS/Main.aspx" },
+    { key: "lfm",            label: "LFM",             url: LVL + "DMS/Dashparts/WorkingFiles.aspx?" },
+    { key: "my-baskets",     label: "My Baskets",      url: LVL + "DMS/Dashparts/My_Baskets.aspx?" },
+    { key: "shared-baskets", label: "Shared Baskets",  url: LVL + "Search/Search.aspx?def=stdbasketssharedsearch" },
+    { key: "subscriptions",  label: "Subscriptions",   url: LVL + "DMS/Subscriptions.aspx?Mode=contact" }
+  ];
+
+  const SEARCH_LINKS = [
+    ...LINK_ORDER,
+    { label: "Information Zone", url: LVL + "DMS/Main.aspx" },
+    { label: "Local File Management", url: LVL + "DMS/Dashparts/WorkingFiles.aspx?" },
+    { label: "My Recent Files", url: LVL + "DMS/dashparts/MyDocumentHistory.aspx?days=30" },
+    { label: "My Saved Searches", url: LVL + "Search/Dashparts/savedSearches.aspx?" },
+    { label: "My Favourites", url: LVL + "Entity/Dashparts/my_favourites.aspx?" },
+    { label: "Landing Page", url: LVL + "Core/Landing.aspx" },
+    { label: "Learning Zone", url: LVL + "Core/LearningZone.aspx" },
+    { label: "Search Organisations", url: LVL + "Search/Search.aspx?def=stdMiniorganisationsearch" },
+    { label: "Add Organisations", url: LVL + "Organisation/Add.aspx?organisationType=external" },
+    { label: "Search Contact External", url: LVL + "Search/Search.aspx?def=stdMiniContactsearch_External" },
+    { label: "Search Contact Internal", url: LVL + "Search/Search.aspx?def=stdMiniContactsearch_Internal" },
+    { label: "Add Contact Internal", url: LVL + "Contact/AddContact.aspx?organisationType=internal" },
+    { label: "Add Contact External", url: LVL + "Contact/AddContact.aspx?organisationType=external" },
+    { label: "Search Actions", url: LVL + "Search/Search.aspx?def=stdactionsearch" },
+    { label: "Quick Find Projects", url: LVL + "Entity/EntitySearch.aspx?ec=3" },
+    { label: "Search Projects", url: LVL + "Search/Search.aspx?def=stdMiniProjSearch" },
+    { label: "Search DLM", url: LVL + "Search/Search.aspx?def=stddrawingmanager" },
+    { label: "System Usage Chart", url: LVL + "Core/SystemUsage.aspx" },
+    { label: "Top 1000 Documents", url: LVL + "Search/Search.aspx?def=stdusagetop1000documentsread" },
+  ];
+
+  const openNewTabCheckbox = document.getElementById('openNewTab');
+
+  // ✅ Unified navigation
+  function navigate(url) {
+    if (!url) return;
+    if (openNewTabCheckbox && openNewTabCheckbox.checked) {
+      window.open(url, "_blank");
+    } else {
+      window.location.href = url;
+    }
+  }
+
+  // --- Resize toolbar with grid ---
+  const grid = document.querySelector('.grid');
+  const toolbar = document.querySelector('.toolbar');
+  function syncToolbarWidth() { toolbar.style.width = grid.offsetWidth + 'px'; }
+  syncToolbarWidth();
+  window.addEventListener('resize', syncToolbarWidth);
+
+  // --- Multi-select dropdown ---
+  const ms = document.getElementById('ms');
+  const toggleBtn = ms.querySelector('.ms-toggle');
+  const panel = ms.querySelector('.ms-panel');
+  const summaryEl = document.getElementById('ms-summary');
+  const checkboxes = Array.from(ms.querySelectorAll('input[type="checkbox"]'));
+
+  function updateSummary() {
+    const picked = checkboxes.filter(cb => cb.checked)
+      .map(cb => LINK_ORDER.find(o => o.key === cb.dataset.key)?.label || '')
+      .filter(Boolean);
+    summaryEl.textContent = picked.length ? picked.join(', ') : 'Select…';
+  }
+  updateSummary();
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const nowOpen = !panel.classList.contains('open');
+    panel.classList.toggle('open', nowOpen);
+    toggleBtn.setAttribute('aria-expanded', String(nowOpen));
+  });
+
+  panel.addEventListener('click', (e) => e.stopPropagation());
+  document.addEventListener('click', () => { panel.classList.remove('open'); toggleBtn.setAttribute('aria-expanded', 'false'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { panel.classList.remove('open'); toggleBtn.setAttribute('aria-expanded', 'false'); }});
+  checkboxes.forEach(cb => cb.addEventListener('change', updateSummary));
+
+  // 🚀 Open Selected
+  document.getElementById('openSelected').addEventListener('click', () => {
+    const selected = checkboxes.filter(cb => cb.checked).map(cb => cb.dataset.key);
+    const urls = LINK_ORDER.filter(item => selected.includes(item.key)).map(item => item.url);
+
+    urls.forEach((url, i) => {
+      if (i < urls.length - 1 && openNewTabCheckbox.checked) {
+        window.open(url, "_blank");
+      } else {
+        navigate(url);
+      }
+    });
+
+    panel.classList.remove('open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  // --- Search box ---
+  const searchInput = document.getElementById('searchInput');
+  const searchResult = document.getElementById('searchResult');
+
+  searchInput.addEventListener('input', () => {
+    const raw = searchInput.value;
+    const term = raw.trim().toLowerCase();
+    searchResult.innerHTML = '';
+    delete searchResult.dataset.url;
+
+    let matches = [];
+    if (raw === ' ') {
+      matches = SEARCH_LINKS;
+    } else if (term) {
+      matches = SEARCH_LINKS.filter(item => item.label.toLowerCase().includes(term));
+    }
+
+    if (matches.length > 0) {
+      matches.forEach(item => {
+        const div = document.createElement('div');
+        div.textContent = item.label;
+        div.addEventListener('click', () => navigate(item.url));
+        searchResult.appendChild(div);
+      });
+      searchResult.dataset.url = matches[0].url;
+    } else if (term || raw === ' ') {
+      searchResult.textContent = '  No results  ';
+    }
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const url = searchResult.dataset.url;
+      if (url) navigate(url);
+    }
+  });
+</script>
+
+<script>
+  // Hide "New Tabs" checkbox if running in iframe
+  if (window.self !== window.top) {
+    const checkboxLabel = document.querySelector("label[for='openNewTab']");
+    if (checkboxLabel) checkboxLabel.style.display = "none";
+  }
+</script>
+
+<script>
+  // Tell parent window when a link/button is clicked
+  document.addEventListener("click", e => {
+    const link = e.target.closest("a[href], button[data-url]");
+    if (!link) return;
+
+    e.preventDefault();
+    const url = link.href || link.dataset.url;
+    if (!url) return;
+
+    // Send message to parent (Tampermonkey)
+    window.parent.postMessage({ type: "pim-nav", url }, "*");
+  });
+</script>
+
+
+
+</body>
+</html>
